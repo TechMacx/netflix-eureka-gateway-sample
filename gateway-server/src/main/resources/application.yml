@@ -1,0 +1,152 @@
+spring:
+  application:
+    name: gateway-server
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: servicea
+          uri: servicea  # lb://servicea  # Load-balanced URL to SERVICEA
+          predicates:
+            - Path=/apia/**
+#          filters:
+#            - RewritePath=/apia/(?<path>.*), /${path}  # Rewrite to match SERVICEA
+        - id: serviceb
+          uri: lb://serviceb  # Load-balanced URL to SERVICEB
+          predicates:
+            - Path=/serviceb/**
+#          filters:
+#            - RewritePath=/api/serviceb/(?<path>.*), /${path}  # Rewrite to match SERVICEA
+            
+server:
+  port: 8080
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true 		
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+
+
+#spring:
+#  application:
+#    name: gateway-server
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: usermgnt-svc
+#          uri: lb://usermgnt-svc
+#          predicates:
+#            - Path=/api/user/**
+#            - Path=/api/user/healthCheck
+#            - Path=/user-service/**
+#            - Path=/user-service/api-docs/**
+#            - Path=/user-service/api-docs/swagger-config/**
+#            - Path=/user-service/swagger-ui/**
+#            - Path=/user-service/swagger-ui.html
+#            - Path=/user-service/v3/api-docs/**
+#          filters:
+#            - name: RequestHeaderToRequestUri
+#              args:
+#                name: Authorization
+#                value: "${authFilter}"
+#        
+#        - id: template-svc
+#          uri: lb://template-svc
+#          predicates:
+#            - Path=/api/taf/**
+#            - Path=/template-service/**
+#            - Path=/template-service/api-docs/**
+#            - Path=/template-service/api-docs/swagger-config/**
+#            - Path=/template-service/swagger-ui/**
+#            - Path=/template-service/swagger-ui.html
+#            - Path=/template-service/v3/api-docs/**
+#          filters:
+#            - name: RequestHeaderToRequestUri
+#              args:
+#                name: Authorization
+#                value: "${authFilter}"
+#        
+#        - id: formdata-svc
+#          uri: lb://formdata-svc
+#          predicates:
+#            - Path=/api/fds/**
+#            - Path=/formdata-service/**
+#            - Path=/formdata-service/api-docs/**
+#            - Path=/formdata-service/api-docs/swagger-config/**
+#            - Path=/formdata-service/swagger-ui/**
+#            - Path=/formdata-service/swagger-ui.html
+#            - Path=/formdata-service/v3/api-docs/**
+#          filters:
+#            - name: RequestHeaderToRequestUri
+#              args:
+#                name: Authorization
+#                value: "${authFilter}"
+#        
+#        - id: scheduler-svc
+#          uri: lb://scheduler-svc
+#          predicates:
+#            - Path=/api/scheduler/**
+#            - Path=/scheduler-svc/**
+#            - Path=/scheduler-svc/api-docs/**
+#            - Path=/scheduler-svc/api-docs/swagger-config/**
+#            - Path=/scheduler-svc/swagger-ui/**
+#            - Path=/scheduler-svc/swagger-ui.html
+#            - Path=/scheduler-svc/v3/api-docs/**
+#          filters:
+#            - name: RequestHeaderToRequestUri
+#              args:
+#                name: Authorization
+#                value: "${authFilter}"
+#        
+#        - id: masterdata-svc
+#          uri: lb://masterdata-svc
+#          predicates:
+#            - Path=/api/mdm/**
+#            - Path=/api/mdm/lookup/**
+#            - Path=/masterdata-service/**
+#            - Path=/masterdata-service/api-docs/**
+#            - Path=/masterdata-service/api-docs/swagger-config/**
+#            - Path=/masterdata-service/swagger-ui/**
+#            - Path=/masterdata-service/swagger-ui.html
+#            - Path=/masterdata-service/v3/api-docs/**
+#          filters:
+#            - name: RequestHeaderToRequestUri
+#              args:
+#                name: Authorization
+#                value: "${authFilter}"
+#        
+#        - id: openapi
+#          uri: http://localhost:9191
+#          predicates:
+#            - Path=/v3/api-docs/**
+#          filters:
+#            - name: RewritePath
+#              args:
+#                regex: /v3/api-docs/(?<path>.*)
+#                replacement: /${path}/v3/api-docs
+#
+#server:
+#  port: 8080
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#    register-with-eureka: true
+#    fetch-registry: true
+#
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: DEBUG
+#    org.springframework.web: DEBUG
+#
