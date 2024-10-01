@@ -1,0 +1,68 @@
+##############################
+## LAMBDA function - PostLogin
+##############################
+## if zip file needs to be created during terraform deployment
+data "archive_file" "post-login" {
+  type        = "zip"
+  source_file = "${path.module}/templates/src/index.js"
+  output_path = "${path.module}/dist/index.zip"
+}
+
+## Create IAM policy document for post-login
+data "aws_iam_policy_document" "post-login" {
+  version = "2012-10-17"
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+## create IAM role for post-login
+resource "aws_iam_role" "post-login" {
+  name               = "${var.infra_env}-${var.proj_name}-postLogin-role-${cluster_name}"
+  assume_role_policy = data.aws_iam_policy_document.post-login.json
+}
+
+## Attached IAM policy for Lambda basic execution role
+resource "aws_iam_role_policy_attachment" "post-login-lambda" {
+  role       = aws_iam_role.post-login.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
+}
+resource "aws_iam_role_policy_attachment" "post-login-ses" {
+  role       = aws_iam_role.post-login.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+}
+
+## Create LAMBDA function for post-login
+resource "aws_lambda_function" "post-login" {
+  function_name    = "${var.infra_env}-${var.proj_name}-postLogin"
+  filename         = data.archive_file.post-login.output_path         // depends on "archive_file.post-login" data line 91 this file
+  source_code_hash = data.archive_file.post-login.output_base64sha256 // depends on "archive_file.post-login" data line 91 this file
+  role             = aws_iam_role.post-login.arn
+  handler          = "index.handler" //"authorize.handler"
+  runtime          = "nodejs16.x"
+  description      = "${var.infra_env} ${var.proj_name} postLogin script for validate authorized users" //lambda configuration parameters
+  memory_size      = 128
+  timeout          = 30
+  ephemeral_storage {
+    size = 512
+  }
+}
+
+####################
+## SES for PostLogin
+####################
+resource "aws_ses_email_identity" "post-login" {
+  // email = "aritra.biswas@arpiantech.com" //"ab.aritrab@gmail.com"
+  count = length(var.ses_email_addresses)
+  email = var.ses_email_addresses[count.index]
+
+  lifecycle {
+    ignore_changes = [
+      email
+    ]
+  }
+}

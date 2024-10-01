@@ -1,0 +1,1 @@
+PRIMARY REGION : for Deployment guide follow this [README.md](/aws_infrastructure_terraform/README.md)
